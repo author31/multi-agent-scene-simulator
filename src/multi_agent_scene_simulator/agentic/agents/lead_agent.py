@@ -3,18 +3,6 @@ import dspy
 from ...config import settings
 from ..schemas import SubTask
 
-class BlenderPythonCode(dspy.Signature):
-    """
-    Generate Python code using Blender’s Python API based on a given instruction. 
-    The produced code will be executed via `send_command` to create, modify, or query 
-    objects within Blender, the open-source 3D creation suite.
-    """
-    instruction: str = dspy.InputField(
-        desc="A detailed and unambiguous description of the desired Blender task or scene operation."
-    )
-    code: str = dspy.OutputField(
-        desc="Valid Python code using Blender's bpy API that fulfills the given instruction."
-    )
 
 class TaskDecomposer(dspy.Signature):
     """
@@ -44,17 +32,6 @@ class AssetFinder(dspy.Module):
         ]
 
 
-class BlenderCodeGenerator(dspy.Module):
-    def __init__(self, model: str):
-        self.model = model
-        self.generator = dspy.Predict(BlenderPythonCode)
-
-    def forward(self, instruction: str):
-        with dspy.context(lm=dspy.LM(self.model, api_base=settings.LLM_BASE_URL, api_key=settings.LLM_API_KEY)):
-            code = self.generator(instruction=instruction)
-        return code
-
-
 class LeadAgent(dspy.Module):
     def __init__(self, model: str):
         self.model = model
@@ -62,5 +39,5 @@ class LeadAgent(dspy.Module):
 
     def forward(self, scene_requirement: str, curr_scene_info: str, curr_viewport_screenshot: dspy.Image):
         with dspy.context(lm=dspy.LM(self.model, api_base=settings.LLM_BASE_URL, api_key=settings.LLM_API_KEY)):
-            tasks = self.decomposer(scene_requirement=scene_requirement, curr_scene_info=curr_scene_info, curr_viewport_screenshot=curr_viewport_screenshot)
-        return tasks
+            output = self.decomposer(scene_requirement=scene_requirement, curr_scene_info=curr_scene_info, curr_viewport_screenshot=curr_viewport_screenshot)
+        return [sub_task for sub_task in output.sub_tasks]
