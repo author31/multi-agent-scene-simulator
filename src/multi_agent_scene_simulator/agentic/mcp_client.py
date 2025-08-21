@@ -1,8 +1,4 @@
-import base64
-from io import BytesIO
-
 from fastmcp import Client
-from PIL import Image
 
 from .schemas import ImageResult, ToolResult
 
@@ -50,9 +46,8 @@ async def call_tool(tool_name, call_kwargs: dict | None = None):
                 b64_data = raw_result.get("data") 
                 if not b64_data: continue
 
-                img_pil_fmt = Image.open(BytesIO(base64.b64decode(b64_data)))
                 tool_results.append(
-                    ImageResult(tool_name=tool_name, img=img_pil_fmt)
+                    ImageResult(tool_name=tool_name, image_data=b64_data)
                 )
                 
     return tool_results

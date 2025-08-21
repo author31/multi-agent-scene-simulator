@@ -34,4 +34,8 @@ class SceneEvaluator(dspy.Module):
     def forward(self, scene_requirement: str, curr_scene_info: str, curr_viewport_screenshot: dspy.Image):
         with dspy.context(lm=dspy.LM(self.model, api_base=settings.LLM_BASE_URL, api_key=settings.LLM_API_KEY)):
             evaluate_result = self.evaluator(scene_requirement=scene_requirement, curr_scene_info=curr_scene_info, curr_viewport_screenshot=curr_viewport_screenshot)
-        return evaluate_result
+        return {
+            "match_score": evaluate_result.match_score,
+            "suggestion": evaluate_result.suggestion,
+            "raw_response": str(evaluate_result)
+        }

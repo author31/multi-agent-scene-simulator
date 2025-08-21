@@ -7,12 +7,14 @@ requires-python = ">=3.10"
 dependencies = [
     "click>=8.2.1",
     "dspy>=3.0.1",
-    "fastmcp>=2.11.3",
+    "fastmcp==2.7.0",
+    "litellm>=1.75.8",
     "mlflow[dspy]>=3.2.0",
+    "openai==1.99.9",
 ]
 
 [project.scripts]
-multi-agent-scene-simulator = "multi_agent_scene_simulator:main"
+multi-agent-scene-simulator = "multi_agent_scene_simulator.cli:cli"
 
 [build-system]
 requires = ["hatchling"]

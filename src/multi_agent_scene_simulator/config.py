@@ -5,6 +5,7 @@ class Settings(BaseSettings):
 
     LLM_API_KEY: str
     LLM_BASE_URL: str = "https://openrouter.ai/api/v1"
+    LLM_MAX_TOKENS: int = 32000
 
 
 settings = Settings()

@@ -22,5 +22,9 @@ class BlenderCodeGenerator(dspy.Module):
 
     def forward(self, instruction: str):
         with dspy.context(lm=dspy.LM(self.model, api_base=settings.LLM_BASE_URL, api_key=settings.LLM_API_KEY)):
-            code = self.generator(instruction=instruction)
-        return code
+            result = self.generator(instruction=instruction)
+            assert hasattr(result, "code"), "The LLM response didnt response with `code attr`"
+        return {
+            "code": result.code,
+            "raw_response": str(result)
+        }

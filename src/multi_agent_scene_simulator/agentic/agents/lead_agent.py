@@ -12,10 +12,12 @@ class TaskDecomposer(dspy.Signature):
     - Organize subtasks in logical order of execution.
     - Ensure the subtasks cover all major aspects: modeling, texturing, materials, lighting, animation, simulation, rendering, and post-processing, if applicable.
     - Keep the list concise but complete, avoiding overly vague steps.
+    - Consider previous iterations and their results when generating new tasks.
     """
     scene_requirement: str = dspy.InputField(desc="Users requirement of the scene.")
     curr_scene_info: str = dspy.InputField(desc="Current scene info.")
     curr_viewport_screenshot: dspy.Image = dspy.InputField(desc="Current screenshot of the viewport.")
+    context_for_lead: str = dspy.InputField(desc="Previous execution context and results for better task planning.")
     sub_tasks: list[SubTask] = dspy.OutputField(desc="A list of sub tasks.")
 
 
@@ -37,7 +39,24 @@ class LeadAgent(dspy.Module):
         self.model = model
         self.decomposer = dspy.Predict(TaskDecomposer)
 
-    def forward(self, scene_requirement: str, curr_scene_info: str, curr_viewport_screenshot: dspy.Image):
-        with dspy.context(lm=dspy.LM(self.model, api_base=settings.LLM_BASE_URL, api_key=settings.LLM_API_KEY)):
-            output = self.decomposer(scene_requirement=scene_requirement, curr_scene_info=curr_scene_info, curr_viewport_screenshot=curr_viewport_screenshot)
-        return [sub_task for sub_task in output.sub_tasks]
+    def forward(self, scene_requirement: str, curr_scene_info: str, curr_viewport_screenshot: dspy.Image, context_for_lead: str = ""):
+        with dspy.context(
+            lm=dspy.LM(
+                self.model, 
+                api_base=settings.LLM_BASE_URL, 
+                api_key=settings.LLM_API_KEY,
+                temperature=0.7,
+                max_tokens=settings.LLM_MAX_TOKENS
+            )
+        ):
+            output = self.decomposer(
+                scene_requirement=scene_requirement, 
+                curr_scene_info=curr_scene_info, 
+                curr_viewport_screenshot=curr_viewport_screenshot,
+                context_for_lead=context_for_lead
+            )
+            assert hasattr(output, "sub_tasks"), "The LLM didnt response with `sub_tasks` attr"
+        return {
+            "sub_tasks": [sub_task for sub_task in output.sub_tasks],
+            "raw_response": str(output)
+        }
