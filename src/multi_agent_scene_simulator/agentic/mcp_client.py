@@ -1,12 +1,7 @@
 from fastmcp import Client
 
 from .schemas import ImageResult, ToolResult
-
-BLENDER_MCP_CONFIG = {
-    "mcpServers": {
-        "blender-mcp": {"command": "uvx", "args": ["blender-mcp"]}
-    }
-}
+from ..config import settings
 
 client = None
 
@@ -14,7 +9,7 @@ def init_client():
     global client
     if client: return client
     
-    client = Client(BLENDER_MCP_CONFIG)
+    client = Client(settings.BLENDER_MCP_CONFIG)
     return client
 
 

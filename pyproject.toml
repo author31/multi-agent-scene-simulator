@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
-multi-agent-scene-simulator = "multi_agent_scene_simulator.cli:cli"
+scene-gen = "multi_agent_scene_simulator.cli:cli"
 
 [build-system]
 requires = ["hatchling"]
